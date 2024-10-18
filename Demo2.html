@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do List App</title>
+    <style>
+        body 
+        {
+            position: absolute;
+            font-family: Arial, sans-serif;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-image: url('Assets/Wallpaper.png');
+            position: relative;
+            overflow: hidden;
+        }
+        .container 
+        {
+            margin-top: 10%;
+            background-image: linear-gradient(to right, rgb(47, 4, 68), purple);
+            padding: 10%;
+            border-radius: 7%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            opacity: 1;
+
+        }
+        h1 
+        {
+            text-align: center;
+            color: #f50072;
+        }
+        #task-input {
+            width: 70%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #add-task {
+            padding: 8px 15px;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #add-task:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+        }
+        .edit-input {
+            width: 60%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="background"></div>
+        <h1>To Do List</h1>
+        <div>
+            <input type="text" id="task-input" placeholder="Add a new task">
+            <button id="add-task">Add</button>
+        </div>
+        <ul id="task-list"></ul>
+    </div>
+
+    <audio id="add-sound" src="Assets/soundEffect.mp3" preload="auto"></audio>
+
+    <script>
+        const taskInput = document.getElementById('task-input');
+        const addTaskBtn = document.getElementById('add-task');
+        const taskList = document.getElementById('task-list');
+        const addSound = document.getElementById('add-sound');
+
+        let tasks = [];
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${task}</span>
+                    <div>
+                        <button class="edit-btn" onclick="editTask(${index})">Edit</button>
+                        <button class="delete-btn" onclick="deleteTask(${index})">Delete</button>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const newTask = taskInput.value.trim();
+            if (newTask) {
+                tasks.push(newTask);
+                taskInput.value = '';
+                renderTasks();
+                addSound.play();
+            }
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        function editTask(index) {
+            const li = taskList.children[index];
+            const taskText = tasks[index];
+            li.innerHTML = `
+                <input type="text" class="edit-input" value="${taskText}">
+                <div>
+                    <button class="edit-btn" onclick="saveTask(${index})">Save</button>
+                    <button class="delete-btn" onclick="cancelEdit(${index})">Cancel</button>
+                </div>
+            `;
+        }
+
+        function saveTask(index) {
+            const input = taskList.children[index].querySelector('.edit-input');
+            const newText = input.value.trim();
+            if (newText) {
+                tasks[index] = newText;
+                renderTasks();
+            }
+        }
+
+        function cancelEdit(index) {
+            renderTasks();
+        }
+
+        addTaskBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>

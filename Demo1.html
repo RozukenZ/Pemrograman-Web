@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Scientific Calculator</title>
+    <style>
+        body 
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            margin: 0;
+            background-color: #e6e6fa;
+            font-family: Arial, sans-serif;
+        }
+        .display 
+        {
+            background-color: #222;
+            color: white;
+            font-size: 1.5em;
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            min-height: 60px;
+        }
+        .expression {
+            font-size: 0.8em;
+            color: #aaa;
+            min-height: 20px;
+        }
+        .result 
+        {
+            font-size: 1.2em;
+        }
+        .buttons 
+        {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+        }
+        button
+         {
+            background-color: #ffffff;
+            color: rgb(255, 214, 31);
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover 
+        {
+            background-color: #666;
+        }
+        .operator 
+        {
+            background-color: #5304fd;
+            color: black;
+        }
+        .top-row 
+        {
+            background-color: #000000;
+            color: white;
+        }
+        .equals 
+        {
+            background-color: #ff0000;
+            color: white;
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div class="expression"></div>
+            <div class="result">0</div>
+        </div>
+        <div class="buttons">
+            <button class="top-row">AC</button>
+            <button class="top-row">±</button>
+            <button class="top-row">%</button>
+            <button class="operator">÷</button>
+            <button class="operator">^</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">×</button>
+            <button class="operator">√</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">-</button>
+            <button class="operator">sin</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">+</button>
+            <button class="operator">cos</button>
+            <button style="grid-column: span 2;">0</button>
+            <button>.</button>
+            <button class="operator">mod</button>
+            <button class="operator">tan</button>
+            <button class="equals">=</button>
+        </div>
+    </div>
+    <audio id="keySound" src="Assets/keyboard.mp3" preload="auto"></audio>
+    <script>
+        const expressionDisplay = document.querySelector('.expression');
+        const resultDisplay = document.querySelector('.result');
+        const buttons = document.querySelectorAll('button');
+
+        let currentExpression = '';
+        let currentResult = '0';
+        let lastOperator = '';
+
+        buttons.forEach(button => 
+        {
+            button.addEventListener('click', () => {
+                playKeySound();
+                const value = button.textContent;
+                
+                if (!isNaN(value) || value === '.') 
+                {
+                    appendToExpression(value);
+                } else if (['+', '-', '×', '÷', '^', 'mod'].includes(value)) {
+                    handleOperator(value);
+                } else if (['sin', 'cos', 'tan', '√'].includes(value)) {
+                    handleFunction(value);
+                } else if (value === '=') {
+                    calculateResult();
+                } else if (value === 'AC') {
+                    resetCalculator();
+                } else if (value === '±') {
+                    invertSign();
+                } else if (value === '%') {
+                    handlePercent();
+                }
+                updateDisplay();
+            });
+        });
+
+        function appendToExpression(value) 
+        {
+            if (currentExpression === '0' && value !== '.') 
+            {
+                currentExpression = value;
+            } else {
+                currentExpression += value;
+            }
+        }
+
+        function handleOperator(operator) 
+        {
+            if (currentExpression !== '' && !isNaN(currentExpression[currentExpression.length - 1])) {
+                currentExpression += ' ' + operator + ' ';
+                lastOperator = operator;
+            }
+        }
+
+        function handleFunction(func) 
+        {
+            currentExpression += func + '(';
+        }
+
+        function calculateResult() 
+        {
+            try 
+            {
+                let expression = currentExpression.replace(/×/g, '*').replace(/÷/g, '/').replace(/mod/g, '%').replace(/\^/g, '**');
+                expression = expression.replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(').replace(/√\(/g, 'Math.sqrt(');
+                currentResult = eval(expression).toString();
+                currentExpression = currentResult;
+            } catch (error) 
+            {
+                currentResult = 'Error';
+            }
+        }
+
+        function resetCalculator() 
+        {
+            currentExpression = '';
+            currentResult = '0';
+            lastOperator = '';
+        }
+
+        function invertSign() 
+        {
+            if (currentExpression !== '' && !isNaN(currentExpression)) 
+            {
+                currentExpression = (-parseFloat(currentExpression)).toString();
+            }
+        }
+
+        function handlePercent() 
+        {
+            if (currentExpression !== '' && !isNaN(currentExpression)) 
+            {
+                currentExpression = (parseFloat(currentExpression) / 100).toString();
+            }
+        }
+
+        function updateDisplay() 
+        {
+            expressionDisplay.textContent = currentExpression;
+            resultDisplay.textContent = currentResult;
+        }
+        function playKeySound() 
+        {
+            keySound.currentTime = 500; 
+            setTimeout(() => 
+            {
+                keySound.play(); 
+            }, 1100); 
+        
+            
+            setTimeout(() => 
+            {
+                keySound.pause(); 
+                keySound.currentTime = 0; 
+            }, 1800); 
+        }
+    </script>
+</body>
+</html>
